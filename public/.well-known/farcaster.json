@@ -1,0 +1,12 @@
+{
+  "frame": {
+    "version": "1",
+    "name": "Time Capsule",
+    "iconUrl": "https://time-capsule-nu-tan.vercel.app/sphere.svg",
+    "homeUrl": "https://time-capsule-nu-tan.vercel.app",
+    "imageUrl": "https://time-capsule-nu-tan.vercel.app/sphere.svg",
+    "buttonTitle": "Kapsül oluştur",
+    "splashImageUrl": "https://time-capsule-nu-tan.vercel.app/sphere.svg",
+    "splashBackgroundColor": "#000000"
+  }
+}
