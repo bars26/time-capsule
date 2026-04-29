@@ -1,60 +1,530 @@
-@layer base {
-  :root {
-    --background: #ffffff;
-    --foreground: #171717;
-  }
+/* app/globals.css
+ * Time Capsule V2 design system.
+ * Base blue accent on near-black surfaces, subtle animated background.
+ * Pure CSS — no Tailwind, no Google Fonts.
+ */
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --background: #0a0a0a;
-      --foreground: #ededed;
-    }
-  }
+/* ---------- Design tokens ---------- */
 
-  html,
-  body {
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
+:root {
+  /* Surfaces */
+  --bg: #000000;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-hover: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.2);
 
-  body {
-    color: var(--foreground);
-    background: var(--background);
-    font-family: var(--font-inter), sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-tertiary: rgba(255, 255, 255, 0.4);
 
-  code {
-    background-color: rgba(0, 0, 0, 0.05);
-    border-radius: 6px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    font-family: var(--font-source-code-pro), monospace;
-    font-size: 0.875rem;
-    padding: 0.25rem 0.5rem calc(0.25rem + 2px);
-  }
+  /* Brand */
+  --base-blue: #0052ff;
+  --base-blue-light: #4d85ff;
+  --base-blue-glow: #00d4ff;
+  --base-blue-soft: rgba(0, 82, 255, 0.15);
 
-  @media (prefers-color-scheme: dark) {
-    code {
-      background-color: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-  }
+  /* Status */
+  --success: #00c853;
+  --warning: #ffa726;
+  --error: #ff6b6b;
+  --error-soft: rgba(255, 107, 107, 0.1);
 
-  * {
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-  }
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "SF Pro Display", "Segoe UI", system-ui, "Helvetica Neue", Helvetica,
+    Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Cascadia Code",
+    "Source Code Pro", monospace;
 
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
 
-  @media (prefers-color-scheme: dark) {
-    html {
-      color-scheme: dark;
-    }
+  /* Shadows */
+  --glow-blue: 0 0 0 4px rgba(0, 82, 255, 0.18);
+}
+
+/* ---------- Reset ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+body {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ---------- Animated background gradient ----------
+ * Two soft Base-blue radial blobs that drift slowly. Sits behind everything
+ * via a fixed pseudo-element; pointer-events: none so it never blocks UI.
+ */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: -10%;
+  z-index: -1;
+  background:
+    radial-gradient(
+      circle at 20% 25%,
+      rgba(0, 82, 255, 0.22),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 78% 78%,
+      rgba(0, 212, 255, 0.16),
+      transparent 55%
+    );
+  animation: bgDrift 18s ease-in-out infinite alternate;
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+@keyframes bgDrift {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-4%, 3%) scale(1.08);
+    opacity: 1;
+  }
+}
+
+/* ---------- Typography helpers ---------- */
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 56px;
+  line-height: 1.05;
+}
+h2 {
+  font-size: 36px;
+  line-height: 1.1;
+}
+h3 {
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+a {
+  color: var(--base-blue-light);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+a:hover {
+  color: var(--base-blue-glow);
+}
+
+code,
+kbd,
+pre {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* ---------- Reusable utility classes ---------- */
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.container-narrow {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+
+.button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  background: var(--base-blue);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 100ms ease, filter 150ms ease, box-shadow 150ms ease;
+}
+.button-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: var(--glow-blue);
+}
+.button-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.button-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+.button-secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--text-secondary);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: var(--radius-pill);
+}
+.badge-locked {
+  background: var(--surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.badge-ready {
+  background: rgba(0, 200, 83, 0.15);
+  color: var(--success);
+}
+.badge-opened {
+  background: var(--base-blue-soft);
+  color: var(--base-blue-light);
+}
+.badge-hidden {
+  background: rgba(255, 107, 107, 0.12);
+  color: var(--error);
+}
+
+.muted {
+  color: var(--text-secondary);
+}
+.dim {
+  color: var(--text-tertiary);
+}
+
+/* ---------- Inputs (textarea, input, select) ---------- */
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.input:focus,
+.textarea:focus {
+  border-color: var(--base-blue);
+  box-shadow: var(--glow-blue);
+}
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--text-tertiary);
+}
+.textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+/* Make Chrome/Safari's datetime-local calendar icon visible on dark backgrounds.
+   Without this, the icon is rendered black-on-near-black and effectively
+   invisible. Inverting flips it to white. */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.55;
+  cursor: pointer;
+  padding-left: 8px;
+  transition: opacity 150ms ease;
+}
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover,
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 0.95;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ---------- Capsule hero (landing visual) ----------
+ * A small Base-blue capsule that morphs in from a circle on first paint,
+ * then continuously drifts and breathes via gradient + float. Pure CSS,
+ * no images, no JS.
+ */
+
+.capsule-hero-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 32px;
+  animation: hero-float 4s ease-in-out infinite;
+}
+
+.capsule-hero {
+  width: 96px;
+  height: 48px;
+  background: linear-gradient(
+    135deg,
+    var(--base-blue) 0%,
+    var(--base-blue-light) 50%,
+    var(--base-blue-glow) 100%
+  );
+  background-size: 200% 200%;
+  border-radius: 999px;
+  box-shadow:
+    0 0 60px rgba(0, 82, 255, 0.45),
+    0 0 120px rgba(0, 212, 255, 0.2);
+  /* Slower morph (2.4s) so the circle → capsule transformation is clearly
+     visible. ease-out keeps the start gentle, finish firm. */
+  animation:
+    hero-morph-in 2.4s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    hero-gradient 7s ease-in-out infinite;
+}
+
+@keyframes hero-morph-in {
+  from {
+    width: 48px;
+    border-radius: 50%;
+    opacity: 0;
+    filter: blur(6px);
+  }
+  to {
+    width: 96px;
+    border-radius: 999px;
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes hero-gradient {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (max-width: 640px) {
+  .capsule-hero {
+    width: 80px;
+    height: 40px;
+  }
+}
+
+/* ---------- Mini capsule logo (header brand) ---------- */
+
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 150ms ease;
+}
+.brand-link:hover {
+  opacity: 0.8;
+}
+
+.capsule-logo {
+  width: 28px;
+  height: 14px;
+  background: linear-gradient(
+    135deg,
+    var(--base-blue),
+    var(--base-blue-light) 60%,
+    var(--base-blue-glow)
+  );
+  background-size: 200% 200%;
+  border-radius: 999px;
+  box-shadow: 0 0 14px rgba(0, 82, 255, 0.45);
+  flex-shrink: 0;
+  animation: hero-gradient 8s ease-in-out infinite;
+}
+
+.brand-text {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* ---------- Pagination ---------- */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+  font-size: 13px;
+}
+.pagination button {
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  transition: all 150ms ease;
+}
+.pagination button:hover:not(:disabled) {
+  border-color: var(--base-blue-light);
+  color: var(--base-blue-light);
+}
+.pagination button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.pagination span {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Inline copy button ---------- */
+
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 150ms ease;
+}
+.copy-btn:hover {
+  border-color: var(--base-blue-light);
+  color: var(--base-blue-light);
+}
+.copy-btn.copied {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+/* ---------- Page transitions (subtle) ---------- */
+
+main {
+  animation: pageEnter 360ms ease-out;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Selection ---------- */
+
+::selection {
+  background: var(--base-blue);
+  color: #ffffff;
+}
+
+/* ---------- Mobile tweaks ---------- */
+
+@media (max-width: 640px) {
+  h1 {
+    font-size: 40px;
+  }
+  h2 {
+    font-size: 28px;
+  }
+  .container,
+  .container-narrow {
+    padding: 32px 20px;
   }
 }
