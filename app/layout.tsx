@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   title: "Time Capsule",
   description:
     "Onchain time capsules on Base. Lock a message until the date you choose.",
+  // base.dev domain verification — Next.js renders this as a <meta> tag.
+  other: {
+    "base:app_id": "69eb7d2ae67b282fc52d2a58",
+  },
 };
 
 export default function RootLayout({
