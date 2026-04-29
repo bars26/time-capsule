@@ -35,9 +35,40 @@ export const metadata: Metadata = {
   icons: {
     icon: "/sphere.svg",
   },
-  // base.dev domain verification — Next.js renders this as a <meta> tag.
+  // base.dev / Farcaster Mini App metadata.
+  // - base:app_id verifies domain ownership for base.dev catalog.
+  // - fc:miniapp is the v2 Farcaster Mini App embed; fc:frame kept as fallback
+  //   for clients still on the older spec.
   other: {
     "base:app_id": "69eb7d2ae67b282fc52d2a58",
+    "fc:miniapp": JSON.stringify({
+      version: "next",
+      imageUrl: ICON_URL,
+      button: {
+        title: "Kapsül oluştur",
+        action: {
+          type: "launch_miniapp",
+          name: SITE_NAME,
+          url: SITE_URL,
+          splashImageUrl: ICON_URL,
+          splashBackgroundColor: "#000000",
+        },
+      },
+    }),
+    "fc:frame": JSON.stringify({
+      version: "next",
+      imageUrl: ICON_URL,
+      button: {
+        title: "Kapsül oluştur",
+        action: {
+          type: "launch_frame",
+          name: SITE_NAME,
+          url: SITE_URL,
+          splashImageUrl: ICON_URL,
+          splashBackgroundColor: "#000000",
+        },
+      },
+    }),
   },
 };
 
