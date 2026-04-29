@@ -190,7 +190,6 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
   const isSender = !!address && address.toLowerCase() === sender.toLowerCase();
   const isRecipient =
     !!address && address.toLowerCase() === recipient.toLowerCase();
-  const isSelf = sender.toLowerCase() === recipient.toLowerCase();
   const canHide =
     isSender && !isHidden && now - createdSeconds <= HOUR;
   const hideRemainingSeconds = HOUR - (now - createdSeconds);
