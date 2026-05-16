@@ -9,8 +9,7 @@
 import { useLocale, useTranslations } from "next-intl";
 
 const COOKIE_NAME = "NEXT_LOCALE";
-const SUPPORTED = ["tr", "en"] as const;
-type Lang = (typeof SUPPORTED)[number];
+type Lang = "tr" | "en";
 
 export function LanguageSwitcher() {
   const locale = useLocale() as Lang;
