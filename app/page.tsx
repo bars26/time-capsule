@@ -30,7 +30,11 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import { TIME_CAPSULE_ADDRESS, TIME_CAPSULE_ABI } from "../lib/contract";
+import {
+  TIME_CAPSULE_ADDRESS,
+  TIME_CAPSULE_ABI,
+  BUILDER_CODE_SUFFIX,
+} from "../lib/contract";
 import { encryptMessage } from "../lib/encryption";
 import { uploadToIPFS } from "../lib/ipfs";
 
@@ -329,6 +333,7 @@ function Home() {
         args: [recipientAddr, cid, BigInt(unlockTimestamp), title, coverEmoji],
         value: parseEther(FEE_ETH),
         chainId: baseSepolia.id,
+        dataSuffix: BUILDER_CODE_SUFFIX,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : t("home.errors.unknown"));

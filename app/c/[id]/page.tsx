@@ -15,7 +15,11 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { Address } from "viem";
-import { TIME_CAPSULE_ADDRESS, TIME_CAPSULE_ABI } from "../../../lib/contract";
+import {
+  TIME_CAPSULE_ADDRESS,
+  TIME_CAPSULE_ABI,
+  BUILDER_CODE_SUFFIX,
+} from "../../../lib/contract";
 import { fetchFromIPFS } from "../../../lib/ipfs";
 import {
   decryptMessage,
@@ -227,6 +231,7 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
       address: TIME_CAPSULE_ADDRESS,
       functionName: "hideCapsule",
       args: [capsuleId],
+      dataSuffix: BUILDER_CODE_SUFFIX,
     });
   };
 

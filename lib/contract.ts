@@ -2,6 +2,13 @@
 export const TIME_CAPSULE_ADDRESS =
   "0x648d13777cD83A15e7C9421590f615B83EAca793" as const;
 
+// base.dev Builder Code (bc_sfeb71ad) — appended as dataSuffix on every
+// transaction so base.dev attributes the activity to this app's dashboard.
+// Both createCapsule and hideCapsule pass this. The bytes are an ASCII
+// encoding of the code plus padding markers per Base's tagging spec.
+export const BUILDER_CODE_SUFFIX =
+  "0x62635f73666562373161640b00802180218021802180218021802180218021" as const;
+
 export const TIME_CAPSULE_ABI = [
   // ---------- Constructor ----------
   {
