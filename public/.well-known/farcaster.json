@@ -1,12 +1,17 @@
 {
+  "accountAssociation": {
+    "header": "eyJmaWQiOjI0MzEyNywidHlwZSI6ImF1dGgiLCJrZXkiOiIweDM1REUyNkQ4Q2IwM2MzQjYwNzQwNjhGRDZiQzdhZDU1MWJiNTAxMDQifQ",
+    "payload": "eyJkb21haW4iOiJ0aW1lLWNhcHN1bGUtbnUtdGFuLnZlcmNlbC5hcHAifQ",
+    "signature": "idRk1GZMO4JEsnGqkLjTrDxYgM4VzN+UsPXynC8YjSlEL0MAwXXjn/sBf5g369QHpq8g4nkZcvOGFpOW2Yw0rhw="
+  },
   "miniapp": {
     "version": "1",
     "name": "Time Capsule",
-    "iconUrl": "https://time-capsule-nu-tan.vercel.app/sphere.svg",
+    "iconUrl": "https://time-capsule-nu-tan.vercel.app/sphere-icon.png",
     "homeUrl": "https://time-capsule-nu-tan.vercel.app",
-    "imageUrl": "https://time-capsule-nu-tan.vercel.app/sphere.svg",
+    "imageUrl": "https://time-capsule-nu-tan.vercel.app/sphere-og.png",
     "buttonTitle": "Kapsül oluştur",
-    "splashImageUrl": "https://time-capsule-nu-tan.vercel.app/sphere.svg",
+    "splashImageUrl": "https://time-capsule-nu-tan.vercel.app/sphere-icon.png",
     "splashBackgroundColor": "#000000",
     "description": "Geleceğe bir mesaj kilitle. Onchain, şifreli, kalıcı.",
     "primaryCategory": "social"
@@ -14,11 +19,11 @@
   "frame": {
     "version": "1",
     "name": "Time Capsule",
-    "iconUrl": "https://time-capsule-nu-tan.vercel.app/sphere.svg",
+    "iconUrl": "https://time-capsule-nu-tan.vercel.app/sphere-icon.png",
     "homeUrl": "https://time-capsule-nu-tan.vercel.app",
-    "imageUrl": "https://time-capsule-nu-tan.vercel.app/sphere.svg",
+    "imageUrl": "https://time-capsule-nu-tan.vercel.app/sphere-og.png",
     "buttonTitle": "Kapsül oluştur",
-    "splashImageUrl": "https://time-capsule-nu-tan.vercel.app/sphere.svg",
+    "splashImageUrl": "https://time-capsule-nu-tan.vercel.app/sphere-icon.png",
     "splashBackgroundColor": "#000000"
   }
 }

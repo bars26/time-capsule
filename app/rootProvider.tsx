@@ -1,22 +1,51 @@
 "use client";
 
 import { ReactNode } from "react";
-import { WagmiProvider, http } from "wagmi";
+import { WagmiProvider, http, createConfig } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   RainbowKitProvider,
-  getDefaultConfig,
+  connectorsForWallets,
   darkTheme,
 } from "@rainbow-me/rainbowkit";
+import {
+  coinbaseWallet,
+  metaMaskWallet,
+  rabbyWallet,
+  okxWallet,
+  walletConnectWallet,
+  rainbowWallet,
+  trustWallet,
+  phantomWallet,
+} from "@rainbow-me/rainbowkit/wallets";
 import "@rainbow-me/rainbowkit/styles.css";
 
-const config = getDefaultConfig({
-  appName: "Time Capsule",
-  // Get a free WalletConnect project ID from https://cloud.reown.com
-  // and put it in .env as NEXT_PUBLIC_WC_PROJECT_ID
-  // Without it, browser extensions still work but mobile QR connect won't.
-  projectId: process.env.NEXT_PUBLIC_WC_PROJECT_ID || "PLACEHOLDER",
+// Explicit wallet list. Base ecosystem prioritizes Coinbase Wallet (includes
+// Base Smart Wallet flow). MetaMask kept for compatibility but its mobile app
+// is unstable — Rabby and OKX are listed alongside as reliable alternatives.
+const connectors = connectorsForWallets(
+  [
+    {
+      groupName: "Önerilen",
+      wallets: [coinbaseWallet, rabbyWallet, okxWallet, metaMaskWallet],
+    },
+    {
+      groupName: "Diğer",
+      wallets: [walletConnectWallet, rainbowWallet, trustWallet, phantomWallet],
+    },
+  ],
+  {
+    appName: "Time Capsule",
+    // Get a free WalletConnect project ID from https://cloud.reown.com
+    // and put it in .env as NEXT_PUBLIC_WC_PROJECT_ID
+    // Without it, browser extensions still work but mobile QR connect won't.
+    projectId: process.env.NEXT_PUBLIC_WC_PROJECT_ID || "PLACEHOLDER",
+  },
+);
+
+const config = createConfig({
+  connectors,
   chains: [baseSepolia],
   transports: {
     [baseSepolia.id]: http(),

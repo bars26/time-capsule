@@ -8,6 +8,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { Address } from "viem";
 import { TIME_CAPSULE_ADDRESS, TIME_CAPSULE_ABI } from "../../lib/contract";
@@ -67,6 +68,7 @@ function CapsuleCard({
   currentAddress: Address;
   opened: boolean;
 }) {
+  const t = useTranslations();
   const now = BigInt(Math.floor(Date.now() / 1000));
   const isUnlocked = capsule.unlockTime <= now;
   const isHidden = capsule.isHidden;
@@ -77,22 +79,22 @@ function CapsuleCard({
   let badgeText: string;
   let badgeCls: string;
   if (isHidden) {
-    badgeText = "Geri Alındı";
+    badgeText = t("capsules.badgeHidden");
     badgeCls = "badge-hidden";
   } else if (opened) {
-    badgeText = "Açıldı";
+    badgeText = t("capsules.badgeOpened");
     badgeCls = "badge-opened";
   } else if (isUnlocked) {
-    badgeText = "Açılmaya Hazır";
+    badgeText = t("capsules.badgeReady");
     badgeCls = "badge-ready";
   } else {
-    badgeText = "Kilitli";
+    badgeText = t("capsules.badgeLocked");
     badgeCls = "badge-locked";
   }
 
   let partyLabel: string;
   if (isSelf) {
-    partyLabel = "Kendine";
+    partyLabel = t("capsules.selfLabel");
   } else if (isSender) {
     partyLabel = `→ ${shortAddr(capsule.recipient)}`;
   } else {
@@ -135,13 +137,14 @@ function CapsuleCard({
           }}
         >
           <strong style={{ fontSize: 15 }}>
-            {capsule.title || `Kapsül #${capsule.id.toString()}`}
+            {capsule.title ||
+              t("capsules.capsuleNumber", { id: capsule.id.toString() })}
           </strong>
           <span className={`badge ${badgeCls}`}>{badgeText}</span>
         </div>
         <div className="muted" style={{ fontSize: 13 }}>
-          {partyLabel} • {unlockDate.toLocaleDateString("tr-TR")}{" "}
-          {unlockDate.toLocaleTimeString("tr-TR", {
+          {partyLabel} • {unlockDate.toLocaleDateString()}{" "}
+          {unlockDate.toLocaleTimeString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
           })}
@@ -200,6 +203,7 @@ function TabButton({
 }
 
 export default function CapsulesPage() {
+  const t = useTranslations();
   const { address, isConnected } = useAccount();
   const [tab, setTab] = useState<Tab>("sent");
   const [page, setPage] = useState(0);
@@ -333,14 +337,12 @@ export default function CapsulesPage() {
   if (!isConnected) {
     return (
       <main className="container">
-        <h2 style={{ marginBottom: 16 }}>Kapsüllerim</h2>
-        <p style={{ marginBottom: 24 }}>
-          Kapsüllerini görmek için cüzdanını bağla.
-        </p>
+        <h2 style={{ marginBottom: 16 }}>{t("capsules.pageTitle")}</h2>
+        <p style={{ marginBottom: 24 }}>{t("capsules.connectPrompt")}</p>
         <ConnectButton />
         <div style={{ marginTop: 24 }}>
           <Link href="/" className="muted">
-            ← Ana Sayfa
+            {t("capsules.homeBack")}
           </Link>
         </div>
       </main>
@@ -351,13 +353,13 @@ export default function CapsulesPage() {
   let emptyText: string;
   if (tab === "sent") {
     activeList = sentCapsules;
-    emptyText = "Henüz kapsül göndermedin.";
+    emptyText = t("capsules.emptySent");
   } else if (tab === "received") {
     activeList = receivedCapsules;
-    emptyText = "Sana gelen kapsül yok. Belki bir gün sürpriz gelir.";
+    emptyText = t("capsules.emptyReceived");
   } else {
     activeList = readyCapsules;
-    emptyText = "Şu an açılabilecek kapsülün yok.";
+    emptyText = t("capsules.emptyReady");
   }
 
   // Sort + slice for the current page. Done inline (not via useMemo) because
@@ -388,17 +390,17 @@ export default function CapsulesPage() {
         </Link>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <Link href="/" className="button-primary" style={{ padding: "8px 14px", fontSize: 13 }}>
-            + Yeni
+            {t("capsules.newButton")}
           </Link>
           <ConnectButton
             showBalance={false}
-            accountStatus="avatar"
+            accountStatus="address"
             chainStatus="none"
           />
         </div>
       </div>
 
-      <h2 style={{ margin: "0 0 24px" }}>Kapsüllerim</h2>
+      <h2 style={{ margin: "0 0 24px" }}>{t("capsules.pageTitle")}</h2>
 
       <div
         style={{
@@ -414,26 +416,26 @@ export default function CapsulesPage() {
           onClick={() => setTab("sent")}
           count={sentCapsules.length}
         >
-          Gönderdiklerim
+          {t("capsules.tabSent")}
         </TabButton>
         <TabButton
           active={tab === "received"}
           onClick={() => setTab("received")}
           count={receivedCapsules.length}
         >
-          Bana Gelenler
+          {t("capsules.tabReceived")}
         </TabButton>
         <TabButton
           active={tab === "ready"}
           onClick={() => setTab("ready")}
           count={readyCapsules.length}
         >
-          Açılmaya Hazır
+          {t("capsules.tabReady")}
         </TabButton>
       </div>
 
       {isLoading ? (
-        <p className="muted">Yükleniyor...</p>
+        <p className="muted">{t("common.loading")}</p>
       ) : activeList.length === 0 ? (
         <div className="surface" style={{ textAlign: "center", padding: 40 }}>
           <p className="muted" style={{ marginBottom: 16 }}>
@@ -441,7 +443,7 @@ export default function CapsulesPage() {
           </p>
           {tab === "sent" && (
             <Link href="/" className="button-primary">
-              + Yeni kapsül
+              {t("capsules.newCapsuleButton")}
             </Link>
           )}
         </div>
@@ -465,10 +467,10 @@ export default function CapsulesPage() {
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={safePage === 0}
               >
-                ← Önceki
+                ← {t("common.previous")}
               </button>
               <span>
-                Sayfa {safePage + 1} / {totalPages}
+                {t("common.page", { current: safePage + 1, total: totalPages })}
               </span>
               <button
                 type="button"
@@ -477,7 +479,7 @@ export default function CapsulesPage() {
                 }
                 disabled={safePage >= totalPages - 1}
               >
-                Sonraki →
+                {t("common.next")} →
               </button>
             </div>
           )}

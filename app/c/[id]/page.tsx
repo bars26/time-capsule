@@ -12,6 +12,7 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import type { Address } from "viem";
 import { TIME_CAPSULE_ADDRESS, TIME_CAPSULE_ABI } from "../../../lib/contract";
@@ -28,27 +29,33 @@ function shortAddr(addr: string): string {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
-function formatDuration(seconds: number): string {
-  if (seconds <= 0) return "0s";
-  if (seconds < 60) return `${Math.floor(seconds)}s`;
+// Takes a translator function so the duration unit suffixes (s/dk/sn/sa/g vs
+// s/m/s/h/d) follow the active locale. The function shape stays the same.
+function formatDuration(
+  seconds: number,
+  t: (key: string, values?: Record<string, unknown>) => string,
+): string {
+  if (seconds <= 0) return t("duration.zero");
+  if (seconds < 60) return t("duration.seconds", { n: Math.floor(seconds) });
   if (seconds < 3600) {
     const m = Math.floor(seconds / 60);
     const s = Math.floor(seconds % 60);
-    return `${m}dk ${s}sn`;
+    return t("duration.minutesSeconds", { m, s });
   }
   if (seconds < 86400) {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
-    return `${h}sa ${m}dk`;
+    return t("duration.hoursMinutes", { h, m });
   }
   const d = Math.floor(seconds / 86400);
   const h = Math.floor((seconds % 86400) / 3600);
-  return `${d}g ${h}sa`;
+  return t("duration.daysHours", { d, h });
 }
 
 type Params = Promise<{ id: string }>;
 
 export default function CapsuleDetailPage({ params }: { params: Params }) {
+  const t = useTranslations();
   const { id } = use(params);
   const { address, isConnected } = useAccount();
 
@@ -133,9 +140,9 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
   if (capsuleId === null) {
     return (
       <main className="container-narrow">
-        <h2>Geçersiz kapsül ID</h2>
+        <h2>{t("capsuleDetail.invalidId")}</h2>
         <Link href="/capsules" className="button-secondary">
-          ← Tüm kapsüller
+          {t("capsuleDetail.allCapsules")}
         </Link>
       </main>
     );
@@ -144,7 +151,7 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
   if (isLoading) {
     return (
       <main className="container-narrow">
-        <p className="muted">Yükleniyor...</p>
+        <p className="muted">{t("common.loading")}</p>
       </main>
     );
   }
@@ -152,12 +159,12 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
   if (!data) {
     return (
       <main className="container-narrow">
-        <h2 style={{ marginBottom: 16 }}>Kapsül bulunamadı</h2>
+        <h2 style={{ marginBottom: 16 }}>{t("capsuleDetail.notFoundTitle")}</h2>
         <p className="muted" style={{ marginBottom: 24 }}>
-          ID #{id} için bir kapsül yok.
+          {t("capsuleDetail.notFoundDesc", { id })}
         </p>
         <Link href="/capsules" className="button-secondary">
-          ← Tüm kapsüller
+          {t("capsuleDetail.allCapsules")}
         </Link>
       </main>
     );
@@ -244,7 +251,7 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
         {isConnected && (
           <ConnectButton
             showBalance={false}
-            accountStatus="avatar"
+            accountStatus="address"
             chainStatus="none"
           />
         )}
@@ -254,7 +261,7 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
         className="muted"
         style={{ fontSize: 14, display: "inline-block", marginBottom: 24 }}
       >
-        ← Tüm kapsüller
+        {t("capsuleDetail.allCapsules")}
       </Link>
 
       <div
@@ -272,17 +279,19 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
           {coverEmoji || (isUnlocked ? "🔓" : "🔒")}
         </div>
 
-        <h2 style={{ marginBottom: 12 }}>{title || `Kapsül #${id}`}</h2>
+        <h2 style={{ marginBottom: 12 }}>
+          {title || t("capsules.capsuleNumber", { id })}
+        </h2>
 
         {isHidden && (
           <span className="badge badge-hidden" style={{ marginBottom: 16 }}>
-            Geri Alındı
+            {t("capsuleDetail.badgeHidden")}
           </span>
         )}
 
         {!isHidden && previouslyOpened && !decrypted && (
           <span className="badge badge-opened" style={{ marginBottom: 16 }}>
-            Daha önce açıldı
+            {t("capsuleDetail.badgeOpened")}
           </span>
         )}
 
@@ -290,7 +299,7 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
         {!isHidden && !isUnlocked && (
           <>
             <p className="muted" style={{ marginBottom: 4, fontSize: 14 }}>
-              {unlockDate.toLocaleString("tr-TR")}
+              {unlockDate.toLocaleString()}
             </p>
             <p
               style={{
@@ -302,7 +311,7 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
                 fontVariantNumeric: "tabular-nums",
               }}
             >
-              {formatDuration(secondsToUnlock)}
+              {formatDuration(secondsToUnlock, t)}
             </p>
           </>
         )}
@@ -310,7 +319,7 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
         {/* Unlocked: show open-date label */}
         {!isHidden && isUnlocked && !decrypted && (
           <p className="muted" style={{ marginBottom: 16, fontSize: 14 }}>
-            {unlockDate.toLocaleString("tr-TR")} tarihinde açıldı
+            {t("capsuleDetail.openedOn", { date: unlockDate.toLocaleString() })}
           </p>
         )}
 
@@ -327,7 +336,7 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
             return (
               <>
                 <p className="muted" style={{ fontSize: 14, marginBottom: 16 }}>
-                  Açmak için cüzdanını bağla
+                  {t("capsuleDetail.connectToOpen")}
                 </p>
                 <ConnectButton />
               </>
@@ -340,8 +349,8 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
               <>
                 <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
                   {isHidden
-                    ? "Bu kapsülü geri aldın. Yine de içeriğini görebilirsin."
-                    : "Sen yazdın, içeriği istediğin zaman görebilirsin."}
+                    ? t("capsuleDetail.senderHidNote")
+                    : t("capsuleDetail.senderPeekNote")}
                 </p>
                 <button
                   type="button"
@@ -349,7 +358,9 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
                   disabled={decrypting}
                   className="button-primary"
                 >
-                  {decrypting ? "Açılıyor..." : "İçeriği Gör"}
+                  {decrypting
+                    ? t("capsuleDetail.opening")
+                    : t("capsuleDetail.viewContent")}
                 </button>
               </>
             );
@@ -365,10 +376,10 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
                 className="button-primary"
               >
                 {decrypting
-                  ? "Açılıyor..."
+                  ? t("capsuleDetail.opening")
                   : previouslyOpened
-                    ? "Tekrar Aç"
-                    : "Aç"}
+                    ? t("capsuleDetail.openAgain")
+                    : t("capsuleDetail.open")}
               </button>
             );
           }
@@ -377,8 +388,7 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
           if (isRecipient && isSender && !isUnlocked) {
             return (
               <p className="muted" style={{ fontSize: 13 }}>
-                Bunu kendi gelecek hâline yazdın. Kilit zamanı gelince
-                buradan açabilirsin.
+                {t("capsuleDetail.selfFutureNote")}
               </p>
             );
           }
@@ -386,7 +396,7 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
           // Stranger or recipient still waiting (gift case).
           return (
             <p className="muted" style={{ fontSize: 14 }}>
-              Bu kapsül {shortAddr(recipient)} için kilitlendi
+              {t("capsuleDetail.lockedFor", { addr: shortAddr(recipient) })}
             </p>
           );
         })()}
@@ -432,9 +442,20 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
       </div>
 
       <div className="surface" style={{ fontSize: 13, marginBottom: 16 }}>
-        <AddressField label="Gönderen" addr={sender} isYou={isSender} />
-        <AddressField label="Alıcı" addr={recipient} isYou={isRecipient} />
-        <Field label="Oluşturma" value={createdDate.toLocaleString("tr-TR")} />
+        <AddressField
+          label={t("capsuleDetail.sender")}
+          addr={sender}
+          isYou={isSender}
+        />
+        <AddressField
+          label={t("capsuleDetail.recipient")}
+          addr={recipient}
+          isYou={isRecipient}
+        />
+        <Field
+          label={t("capsuleDetail.createdAt")}
+          value={createdDate.toLocaleString()}
+        />
       </div>
 
       {/* Reply: when recipient (not sender) just opened a gift, offer to
@@ -445,15 +466,14 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
             className="muted"
             style={{ marginBottom: 12, fontSize: 13, lineHeight: 1.5 }}
           >
-            Bu kapsülü {shortAddr(sender)} sana yazdı. İstersen bir cevap kapsülü
-            gönder — gelecekte açılır.
+            {t("capsuleDetail.replyPrompt", { sender: shortAddr(sender) })}
           </p>
           <Link
             href={`/?to=${sender}`}
             className="button-primary"
             style={{ display: "inline-flex", textDecoration: "none" }}
           >
-            Yanıtla
+            {t("capsuleDetail.reply")}
           </Link>
         </div>
       )}
@@ -464,8 +484,9 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
             className="muted"
             style={{ marginBottom: 12, fontSize: 13, lineHeight: 1.5 }}
           >
-            Sender olarak ilk 1 saat içinde geri alabilirsin. Geri alma
-            penceresinde kalan: <strong>{formatDuration(hideRemainingSeconds)}</strong>
+            {t("capsuleDetail.hideWindowNote", {
+              remaining: formatDuration(hideRemainingSeconds, t),
+            })}
           </p>
           <button
             type="button"
@@ -475,10 +496,10 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
             style={{ width: "100%" }}
           >
             {hideIsPending
-              ? "Cüzdan onayı bekleniyor..."
+              ? t("capsuleDetail.hideWalletPending")
               : hideConfirming
-                ? "İşlem zincirde..."
-                : "Geri Al"}
+                ? t("capsuleDetail.hideConfirming")
+                : t("capsuleDetail.hide")}
           </button>
           {hideError && (
             <p
@@ -498,7 +519,7 @@ export default function CapsuleDetailPage({ params }: { params: Params }) {
       {decrypted && (
         <div className="surface" style={{ marginBottom: 16 }}>
           <p className="label" style={{ marginBottom: 12 }}>
-            Paylaş
+            {t("common.share")}
           </p>
           <ShareButtons title={title} coverEmoji={coverEmoji} id={id} />
         </div>
@@ -532,6 +553,7 @@ function AddressField({
   addr: string;
   isYou: boolean;
 }) {
+  const t = useTranslations();
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -559,14 +581,14 @@ function AddressField({
           style={{ fontFamily: "var(--font-mono)" }}
           title={isYou ? addr : undefined}
         >
-          {isYou ? "Sen" : shortAddr(addr)}
+          {isYou ? t("common.you") : shortAddr(addr)}
         </span>
         <button
           type="button"
           onClick={copy}
           className={`copy-btn ${copied ? "copied" : ""}`}
-          title="Adresi kopyala"
-          aria-label="Adresi kopyala"
+          title={t("common.copyAddress")}
+          aria-label={t("common.copyAddress")}
         >
           {copied ? "✓" : "⧉"}
         </button>
@@ -584,6 +606,7 @@ function ShareButtons({
   coverEmoji: string;
   id: string;
 }) {
+  const t = useTranslations();
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -591,7 +614,7 @@ function ShareButtons({
     setUrl(`${window.location.origin}/c/${id}`);
   }, [id]);
 
-  const text = `${coverEmoji ? coverEmoji + " " : ""}${title || `Kapsül #${id}`} — Time Capsule'da bir kapsül açıldı`;
+  const text = `${coverEmoji ? coverEmoji + " " : ""}${title || t("capsules.capsuleNumber", { id })} — Time Capsule`;
   const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
   const fcUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(url)}`;
 

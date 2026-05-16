@@ -26,6 +26,7 @@ import {
   type Address,
 } from "viem";
 import { normalize } from "viem/ens";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -53,12 +54,30 @@ const baseMainnetClient = createPublicClient({
   transport: http(),
 });
 
+// Error codes thrown by resolveRecipient. We translate at the call site so the
+// helper itself stays free of i18n concerns.
+type ResolveErrorCode =
+  | "RECIPIENT_REQUIRED"
+  | "INVALID_ADDRESS"
+  | "ENS_FAILED"
+  | "ADDRESS_FORMAT";
+
+class ResolveError extends Error {
+  code: ResolveErrorCode;
+  value?: string;
+  constructor(code: ResolveErrorCode, value?: string) {
+    super(code);
+    this.code = code;
+    this.value = value;
+  }
+}
+
 async function resolveRecipient(input: string): Promise<Address> {
   const trimmed = input.trim();
-  if (!trimmed) throw new Error("Alıcı adresini gir");
+  if (!trimmed) throw new ResolveError("RECIPIENT_REQUIRED");
 
   if (trimmed.startsWith("0x")) {
-    if (!isAddress(trimmed)) throw new Error("Geçersiz cüzdan adresi");
+    if (!isAddress(trimmed)) throw new ResolveError("INVALID_ADDRESS");
     return trimmed as Address;
   }
 
@@ -76,10 +95,10 @@ async function resolveRecipient(input: string): Promise<Address> {
         // try next candidate
       }
     }
-    throw new Error(`${trimmed} çözülemedi. 0x ile başlayan adres dene.`);
+    throw new ResolveError("ENS_FAILED", trimmed);
   }
 
-  throw new Error("Adres 0x ile başlamalı veya .base ile bitmeli");
+  throw new ResolveError("ADDRESS_FORMAT");
 }
 
 function getMinDateTimeLocal(): string {
@@ -105,18 +124,25 @@ function getMaxDateTimeLocal(): string {
 export default function HomePage() {
   return (
     <Suspense
-      fallback={
-        <main className="container-narrow" style={{ paddingTop: 80 }}>
-          <p className="muted">Yükleniyor...</p>
-        </main>
-      }
+      fallback={<HomeLoading />}
     >
       <Home />
     </Suspense>
   );
 }
 
+function HomeLoading() {
+  const t = useTranslations();
+  return (
+    <main className="container-narrow" style={{ paddingTop: 80 }}>
+      <p className="muted">{t("common.loading")}</p>
+    </main>
+  );
+}
+
 function Home() {
+  const t = useTranslations();
+
   // Read chain from BOTH sources because some wallet connectors leave one
   // stale after a manual chain change in the wallet UI. If either source
   // says we're on Base Sepolia, treat the form as on the correct chain;
@@ -182,15 +208,12 @@ function Home() {
       setStuckHint(false);
       setConfirmingSince(null);
     } else if (receipt.status === "reverted") {
-      setError(
-        "İşlem zincirde reddedildi. En sık sebep: açılış zamanı yeterince ileride değil. " +
-          "En az 15 dakika sonrasını seç ve tekrar dene.",
-      );
+      setError(t("home.errors.txReverted"));
       setStep("idle");
       setStuckHint(false);
       setConfirmingSince(null);
     }
-  }, [isReceiptFetched, receipt, step]);
+  }, [isReceiptFetched, receipt, step, t]);
 
   // After 30s of confirming, surface a "taking longer than usual" hint.
   useEffect(() => {
@@ -205,11 +228,11 @@ function Home() {
       const msg =
         (writeError as { shortMessage?: string }).shortMessage ||
         writeError.message ||
-        "Cüzdan onayı reddedildi";
+        t("home.errors.walletRejected");
       setError(msg);
       setStep("idle");
     }
-  }, [writeError]);
+  }, [writeError, t]);
 
   const reset = () => {
     setRecipientMode("self");
@@ -233,15 +256,15 @@ function Home() {
     setError("");
 
     if (!message.trim()) {
-      setError("Mesaj boş olamaz");
+      setError(t("home.errors.emptyMessage"));
       return;
     }
     if (!unlockDateTime) {
-      setError("Açılış tarihi seç");
+      setError(t("home.errors.noUnlockDate"));
       return;
     }
     if (title.length > MAX_TITLE) {
-      setError(`Başlık ${MAX_TITLE} karakteri geçemez`);
+      setError(t("home.errors.titleTooLong", { max: MAX_TITLE }));
       return;
     }
 
@@ -252,9 +275,7 @@ function Home() {
       setStep("switching");
       await switchChainAsync({ chainId: baseSepolia.id });
     } catch {
-      setError(
-        "Base Sepolia ağına geçmen lazım. Cüzdan onayını reddettin veya ağ değiştirilemedi.",
-      );
+      setError(t("home.errors.switchChainFailed"));
       setStep("idle");
       return;
     }
@@ -266,7 +287,24 @@ function Home() {
       try {
         recipientAddr = await resolveRecipient(recipientInput);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Alıcı çözülemedi");
+        if (err instanceof ResolveError) {
+          switch (err.code) {
+            case "RECIPIENT_REQUIRED":
+              setError(t("home.errors.recipientRequired"));
+              break;
+            case "INVALID_ADDRESS":
+              setError(t("home.errors.invalidAddress"));
+              break;
+            case "ENS_FAILED":
+              setError(t("home.errors.ensFailed", { name: err.value ?? "" }));
+              break;
+            case "ADDRESS_FORMAT":
+              setError(t("home.errors.addressFormat"));
+              break;
+          }
+        } else {
+          setError(err instanceof Error ? err.message : t("home.errors.unknown"));
+        }
         setStep("idle");
         return;
       }
@@ -293,7 +331,7 @@ function Home() {
         chainId: baseSepolia.id,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Bilinmeyen hata");
+      setError(err instanceof Error ? err.message : t("home.errors.unknown"));
       setStep("idle");
     }
   };
@@ -309,7 +347,7 @@ function Home() {
         <div className="capsule-hero-wrap" aria-hidden="true">
           <div className="capsule-hero" />
         </div>
-        <h1 style={{ marginBottom: 16 }}>Time Capsule</h1>
+        <h1 style={{ marginBottom: 16 }}>{t("home.title")}</h1>
         <p
           style={{
             marginBottom: 32,
@@ -319,15 +357,13 @@ function Home() {
             marginInline: "auto",
           }}
         >
-          Geleceğe bir mesaj kilitle. Kendine veya başkasına. Base ağında
-          onchain, şifreli, kalıcı.
+          {t("home.tagline")}
         </p>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <ConnectButton />
         </div>
         <p className="dim" style={{ marginTop: 16, fontSize: 13 }}>
-          Başlamak için cüzdanını bağla. Ücret: {FEE_ETH} ETH (Base Sepolia
-          testnet).
+          {t("home.connectHint", { fee: FEE_ETH })}
         </p>
       </main>
     );
@@ -336,16 +372,14 @@ function Home() {
   if (!onCorrectChain && step === "idle") {
     return (
       <main className="container-narrow" style={{ paddingTop: 80 }}>
-        <h2 style={{ marginBottom: 16 }}>Yanlış ağ</h2>
-        <p style={{ marginBottom: 24 }}>
-          Bu uygulama Base Sepolia testnet&apos;inde çalışıyor.
-        </p>
+        <h2 style={{ marginBottom: 16 }}>{t("home.wrongNetworkTitle")}</h2>
+        <p style={{ marginBottom: 24 }}>{t("home.wrongNetworkDesc")}</p>
         <button
           type="button"
           onClick={() => switchChain({ chainId: baseSepolia.id })}
           className="button-primary"
         >
-          Base Sepolia&apos;ya geç
+          {t("home.switchToBaseSepolia")}
         </button>
         <div style={{ marginTop: 16 }}>
           <ConnectButton />
@@ -361,12 +395,12 @@ function Home() {
         style={{ paddingTop: 80, textAlign: "center" }}
       >
         <div style={{ fontSize: 48, marginBottom: 16 }}>{coverEmoji || "🔒"}</div>
-        <h2 style={{ marginBottom: 12 }}>Kapsül kilitlendi</h2>
+        <h2 style={{ marginBottom: 12 }}>{t("home.capsuleLocked")}</h2>
         <p style={{ marginBottom: 4 }}>
-          <strong>{new Date(unlockDateTime).toLocaleString("tr-TR")}</strong>
+          <strong>{new Date(unlockDateTime).toLocaleString()}</strong>
         </p>
         <p className="muted" style={{ marginBottom: 24, fontSize: 14 }}>
-          tarihinde açılacak
+          {t("home.willOpenOn")}
         </p>
         {hash && (
           <a
@@ -381,7 +415,7 @@ function Home() {
               color: "var(--text-tertiary)",
             }}
           >
-            View on Basescan ↗
+            {t("home.viewOnBasescan")}
           </a>
         )}
         <div
@@ -393,10 +427,10 @@ function Home() {
           }}
         >
           <button type="button" onClick={reset} className="button-primary">
-            Yeni kapsül
+            {t("home.newCapsule")}
           </button>
           <Link href="/capsules" className="button-secondary">
-            Kapsüllerim
+            {t("home.myCapsules")}
           </Link>
         </div>
       </main>
@@ -416,12 +450,12 @@ function Home() {
           gap: 12,
         }}
       >
-        <h2 style={{ fontSize: 28, margin: 0 }}>Yeni kapsül</h2>
-        <ConnectButton showBalance={false} accountStatus="avatar" chainStatus="none" />
+        <h2 style={{ fontSize: 28, margin: 0 }}>{t("home.formNewCapsule")}</h2>
+        <ConnectButton showBalance={false} accountStatus="address" chainStatus="none" />
       </div>
 
       <form onSubmit={handleSubmit}>
-        <label className="label">Kime?</label>
+        <label className="label">{t("home.recipientLabel")}</label>
         <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
           <button
             type="button"
@@ -430,7 +464,7 @@ function Home() {
             style={{ flex: 1 }}
             disabled={isProcessing}
           >
-            Kendime
+            {t("home.recipientSelf")}
           </button>
           <button
             type="button"
@@ -439,7 +473,7 @@ function Home() {
             style={{ flex: 1 }}
             disabled={isProcessing}
           >
-            Başkasına
+            {t("home.recipientOther")}
           </button>
         </div>
 
@@ -448,14 +482,14 @@ function Home() {
             type="text"
             value={recipientInput}
             onChange={(e) => setRecipientInput(e.target.value)}
-            placeholder="0xABC...123 veya alice.base"
+            placeholder={t("home.recipientPlaceholder")}
             className="input"
             disabled={isProcessing}
             style={{ marginBottom: 16 }}
           />
         )}
 
-        <label className="label">Kapak (opsiyonel)</label>
+        <label className="label">{t("home.coverLabel")}</label>
         <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
           {COVER_EMOJIS.map((emoji) => (
             <button
@@ -483,7 +517,7 @@ function Home() {
         </div>
 
         <label className="label">
-          Başlık (opsiyonel)
+          {t("home.titleLabel")}
           <span className="dim" style={{ float: "right", fontSize: 11 }}>
             {title.length}/{MAX_TITLE}
           </span>
@@ -493,14 +527,14 @@ function Home() {
           value={title}
           onChange={(e) => setTitle(e.target.value.slice(0, MAX_TITLE))}
           maxLength={MAX_TITLE}
-          placeholder="Doğum günün kutlu olsun"
+          placeholder={t("home.titlePlaceholder")}
           className="input"
           disabled={isProcessing}
           style={{ marginBottom: 16 }}
         />
 
         <label className="label">
-          Mesaj
+          {t("home.messageLabel")}
           <span className="dim" style={{ float: "right", fontSize: 11 }}>
             {message.length}/{MAX_MESSAGE}
           </span>
@@ -509,7 +543,7 @@ function Home() {
           value={message}
           onChange={(e) => setMessage(e.target.value.slice(0, MAX_MESSAGE))}
           maxLength={MAX_MESSAGE}
-          placeholder="Geleceğin sana ne diyecek?"
+          placeholder={t("home.messagePlaceholder")}
           className="textarea"
           disabled={isProcessing}
           rows={5}
@@ -517,7 +551,7 @@ function Home() {
           required
         />
 
-        <label className="label">Açılış tarihi ve saati</label>
+        <label className="label">{t("home.unlockDateLabel")}</label>
         <input
           type="datetime-local"
           value={unlockDateTime}
@@ -530,12 +564,11 @@ function Home() {
           required
         />
         <p className="dim" style={{ fontSize: 12, marginBottom: 24 }}>
-          Sağdaki takvim ikonuna tıklayarak seçebilir, elle de yazabilirsin.
-          Açılış zamanı en az 15 dakika sonrası olmalı.
+          {t("home.unlockDateHint")}
         </p>
 
         <p className="dim" style={{ fontSize: 13, marginBottom: 16 }}>
-          Ücret: {FEE_ETH} ETH (Base Sepolia testnet)
+          {t("home.feeNote", { fee: FEE_ETH })}
         </p>
 
         <button
@@ -544,13 +577,13 @@ function Home() {
           className="button-primary"
           style={{ width: "100%" }}
         >
-          {step === "switching" && "Ağ değiştiriliyor..."}
-          {step === "encrypting" && "Şifreleniyor..."}
-          {step === "uploading" && "IPFS'e yükleniyor..."}
-          {step === "signing" && "Cüzdan onayı bekleniyor..."}
-          {step === "confirming" && "İşlem zincirde..."}
-          {step === "idle" && "Kilitle"}
-          {isWalletPending && step === "idle" && "Bekleniyor..."}
+          {step === "switching" && t("home.stepSwitching")}
+          {step === "encrypting" && t("home.stepEncrypting")}
+          {step === "uploading" && t("home.stepUploading")}
+          {step === "signing" && t("home.stepSigning")}
+          {step === "confirming" && t("home.stepConfirming")}
+          {step === "idle" && t("home.btnLock")}
+          {isWalletPending && step === "idle" && t("home.btnWaiting")}
         </button>
 
         {/* Tx hash visible during confirming so a stuck tx is never invisible. */}
@@ -567,7 +600,7 @@ function Home() {
               wordBreak: "break-all",
             }}
           >
-            Basescan&apos;de gör ↗
+            {t("home.viewOnBasescanShort")}
           </a>
         )}
 
@@ -584,9 +617,7 @@ function Home() {
               lineHeight: 1.5,
             }}
           >
-            İşlem 30 saniyeden uzun sürdü. Yukarıdaki Basescan linkinden durumu
-            kontrol edebilirsin. Cüzdandan henüz onaylamadıysan onayla, ya da
-            uzun sürerse Base Sepolia ağı yoğun olabilir.
+            {t("home.txStuckHint")}
           </p>
         )}
 
@@ -608,7 +639,7 @@ function Home() {
 
       <div style={{ marginTop: 32, textAlign: "center" }}>
         <Link href="/capsules" className="muted">
-          Kapsüllerim →
+          {t("home.myCapsulesArrow")}
         </Link>
       </div>
     </main>

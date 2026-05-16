@@ -4,14 +4,23 @@
 // time and keeps the app working even with restricted/slow network.
 
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { RootProvider } from "./rootProvider";
+import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import "./globals.css";
 
 const SITE_URL = "https://time-capsule-nu-tan.vercel.app";
 const SITE_NAME = "Time Capsule";
 const SITE_DESC =
   "Geleceğe bir mesaj kilitle. Kendine veya başkasına. Base ağında onchain, şifreli, kalıcı.";
-const ICON_URL = `${SITE_URL}/sphere.svg`;
+// Farcaster Mini App / base.dev catalog spec requires raster images (PNG/JPG),
+// not SVG. sphere.svg is kept only as the in-browser favicon (browsers handle
+// SVG fine). For the manifest and social previews we use pre-rendered PNGs:
+//   sphere-icon.png  → 1024x1024 square (iconUrl, splashImageUrl)
+//   sphere-og.png    → 1200x630 (3:2 social preview / fc:miniapp imageUrl)
+const ICON_URL = `${SITE_URL}/sphere-icon.png`;
+const OG_IMAGE_URL = `${SITE_URL}/sphere-og.png`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -23,14 +32,14 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: SITE_NAME,
     description: SITE_DESC,
-    images: [{ url: ICON_URL, width: 1200, height: 630, alt: SITE_NAME }],
+    images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: SITE_NAME }],
     locale: "tr_TR",
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_NAME,
     description: SITE_DESC,
-    images: [ICON_URL],
+    images: [OG_IMAGE_URL],
   },
   icons: {
     icon: "/sphere.svg",
@@ -39,11 +48,12 @@ export const metadata: Metadata = {
   // - base:app_id verifies domain ownership for base.dev catalog.
   // - fc:miniapp is the v2 Farcaster Mini App embed; fc:frame kept as fallback
   //   for clients still on the older spec.
+  // imageUrl uses the 3:2 OG preview; splashImageUrl uses the square icon.
   other: {
     "base:app_id": "69eb7d2ae67b282fc52d2a58",
     "fc:miniapp": JSON.stringify({
       version: "next",
-      imageUrl: ICON_URL,
+      imageUrl: OG_IMAGE_URL,
       button: {
         title: "Kapsül oluştur",
         action: {
@@ -57,7 +67,7 @@ export const metadata: Metadata = {
     }),
     "fc:frame": JSON.stringify({
       version: "next",
-      imageUrl: ICON_URL,
+      imageUrl: OG_IMAGE_URL,
       button: {
         title: "Kapsül oluştur",
         action: {
@@ -72,15 +82,34 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body>
-        <RootProvider>{children}</RootProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <RootProvider>
+            {/* Floating language switcher — visible on every page, fixed
+                top-right so it doesn't fight with each page's own header. */}
+            <div
+              style={{
+                position: "fixed",
+                top: 12,
+                right: 12,
+                zIndex: 50,
+              }}
+            >
+              <LanguageSwitcher />
+            </div>
+            {children}
+          </RootProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
