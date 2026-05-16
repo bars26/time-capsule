@@ -35,9 +35,13 @@ function shortAddr(addr: string): string {
 
 // Takes a translator function so the duration unit suffixes (s/dk/sn/sa/g vs
 // s/m/s/h/d) follow the active locale. The function shape stays the same.
+// `t`'s value-param type matches next-intl's ICU placeholder accepted types.
 function formatDuration(
   seconds: number,
-  t: (key: string, values?: Record<string, unknown>) => string,
+  t: (
+    key: string,
+    values?: Record<string, string | number | Date>,
+  ) => string,
 ): string {
   if (seconds <= 0) return t("duration.zero");
   if (seconds < 60) return t("duration.seconds", { n: Math.floor(seconds) });
