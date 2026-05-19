@@ -1,6 +1,8 @@
-// Time Capsule V2 contract on Base Sepolia
+// Time Capsule V2 contract on Base Mainnet (chainId 8453)
+// Deployed: May 2026. Previous Base Sepolia address kept for reference:
+//   0x648d13777cD83A15e7C9421590f615B83EAca793
 export const TIME_CAPSULE_ADDRESS =
-  "0x648d13777cD83A15e7C9421590f615B83EAca793" as const;
+  "0x1F8483b8f0B5CB56eBCC8Cc3F250267831389926" as const;
 
 // base.dev Builder Code (bc_sfeb71ad) — appended as dataSuffix on every
 // transaction so base.dev attributes the activity to this app's dashboard.

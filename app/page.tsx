@@ -17,7 +17,7 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { baseSepolia, base } from "wagmi/chains";
+import { base } from "wagmi/chains";
 import {
   parseEther,
   isAddress,
@@ -149,13 +149,13 @@ function Home() {
 
   // Read chain from BOTH sources because some wallet connectors leave one
   // stale after a manual chain change in the wallet UI. If either source
-  // says we're on Base Sepolia, treat the form as on the correct chain;
-  // submit-time switchChainAsync handles any remaining mismatch.
+  // says we're on Base, treat the form as on the correct chain; submit-time
+  // switchChainAsync handles any remaining mismatch.
   const { address, isConnected, chain: accountChain } = useAccount();
   const chainId = useChainId();
   const detectedChainId = accountChain?.id ?? chainId;
   const { switchChain, switchChainAsync } = useSwitchChain();
-  const onCorrectChain = detectedChainId === baseSepolia.id;
+  const onCorrectChain = detectedChainId === base.id;
 
   // Reply flow: when arriving via /?to=0x... pre-fill the recipient.
   const searchParams = useSearchParams();
@@ -277,7 +277,7 @@ function Home() {
     // chainId state in either useChainId or useAccount().chain.
     try {
       setStep("switching");
-      await switchChainAsync({ chainId: baseSepolia.id });
+      await switchChainAsync({ chainId: base.id });
     } catch {
       setError(t("home.errors.switchChainFailed"));
       setStep("idle");
@@ -332,7 +332,7 @@ function Home() {
         functionName: "createCapsule",
         args: [recipientAddr, cid, BigInt(unlockTimestamp), title, coverEmoji],
         value: parseEther(FEE_ETH),
-        chainId: baseSepolia.id,
+        chainId: base.id,
         dataSuffix: BUILDER_CODE_SUFFIX,
       });
     } catch (err) {
@@ -381,7 +381,7 @@ function Home() {
         <p style={{ marginBottom: 24 }}>{t("home.wrongNetworkDesc")}</p>
         <button
           type="button"
-          onClick={() => switchChain({ chainId: baseSepolia.id })}
+          onClick={() => switchChain({ chainId: base.id })}
           className="button-primary"
         >
           {t("home.switchToBaseSepolia")}
@@ -409,7 +409,7 @@ function Home() {
         </p>
         {hash && (
           <a
-            href={`https://sepolia.basescan.org/tx/${hash}`}
+            href={`https://basescan.org/tx/${hash}`}
             target="_blank"
             rel="noreferrer"
             style={{
@@ -594,7 +594,7 @@ function Home() {
         {/* Tx hash visible during confirming so a stuck tx is never invisible. */}
         {hash && step === "confirming" && (
           <a
-            href={`https://sepolia.basescan.org/tx/${hash}`}
+            href={`https://basescan.org/tx/${hash}`}
             target="_blank"
             rel="noreferrer"
             style={{
