@@ -28,6 +28,8 @@
     "myCapsules": "Kapsüllerim",
     "myCapsulesArrow": "Kapsüllerim →",
     "swapLink": "Takas →",
+    "quickSwapToggle": "💱 ETH'in mi az? Hızlı takas",
+    "quickSwapDesc": "Kapsül ücreti ETH ile ödenir. Uygulamadan çıkmadan token takası yap.",
     "formNewCapsule": "Yeni kapsül",
     "recipientLabel": "Kime?",
     "recipientSelf": "Kendime",

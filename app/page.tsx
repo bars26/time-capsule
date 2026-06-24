@@ -37,6 +37,7 @@ import {
 } from "../lib/contract";
 import { encryptMessage } from "../lib/encryption";
 import { uploadToIPFS } from "../lib/ipfs";
+import SwapBox from "./components/SwapBox";
 
 const COVER_EMOJIS = ["💌", "📜", "🎁", "🎂", "🌹", "🎓", "⏳", "🌙", "✨", "🎉"];
 const FEE_ETH = "0.0001";
@@ -176,6 +177,9 @@ function Home() {
       setRecipientInput(replyTo);
     }
   }, [replyTo]);
+
+  // Inline quick-swap (embedded SwapBox) toggle.
+  const [showSwap, setShowSwap] = useState(false);
 
   // Submission state
   const [step, setStep] = useState<Step>("idle");
@@ -457,6 +461,47 @@ function Home() {
       >
         <h2 style={{ fontSize: 28, margin: 0 }}>{t("home.formNewCapsule")}</h2>
         <ConnectButton showBalance={false} accountStatus="address" chainStatus="none" />
+      </div>
+
+      {/* Inline quick swap — capsule fee is paid in ETH, so let users top up
+          without leaving the create flow. Collapsed by default. */}
+      <div
+        style={{
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-sm)",
+          marginBottom: 24,
+          overflow: "hidden",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setShowSwap((s) => !s)}
+          disabled={isProcessing}
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            background: "var(--surface)",
+            border: "none",
+            padding: "12px 14px",
+            cursor: isProcessing ? "not-allowed" : "pointer",
+            fontSize: 14,
+            color: "var(--text-primary)",
+            textAlign: "left",
+          }}
+        >
+          <span>{t("home.quickSwapToggle")}</span>
+          <span className="dim">{showSwap ? "▲" : "▼"}</span>
+        </button>
+        {showSwap && (
+          <div style={{ padding: 14, borderTop: "1px solid var(--border)" }}>
+            <p className="dim" style={{ fontSize: 12, marginTop: 0, marginBottom: 12 }}>
+              {t("home.quickSwapDesc")}
+            </p>
+            <SwapBox defaultFrom="USDC" defaultTo="ETH" />
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit}>
