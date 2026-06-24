@@ -32,11 +32,13 @@ import { useLocale } from "next-intl";
 import {
   SWAP_TOKENS,
   SWAP_FEE_BPS,
+  SWAP_SLIPPAGE_BPS,
   isNative,
   type SwapToken,
   type QuoteResponse,
   type BuildResponse,
 } from "../../lib/swap";
+import TokenPicker from "./TokenPicker";
 
 type Step =
   | "idle"
@@ -252,34 +254,18 @@ export default function SwapBox({ defaultFrom, defaultTo }: Props) {
     }
   };
 
-  // ---- Render ----
-  const TokenSelect = ({
-    value,
-    onChange,
-    exclude,
-  }: {
-    value: SwapToken;
-    onChange: (t: SwapToken) => void;
-    exclude?: SwapToken;
-  }) => (
-    <select
-      className="input"
-      value={value.symbol}
-      disabled={isProcessing}
-      onChange={(e) => {
-        const next = SWAP_TOKENS.find((tk) => tk.symbol === e.target.value);
-        if (next) onChange(next);
-      }}
-      style={{ width: "auto", minWidth: 120, cursor: "pointer" }}
-    >
-      {SWAP_TOKENS.filter((tk) => tk.symbol !== exclude?.symbol).map((tk) => (
-        <option key={tk.symbol} value={tk.symbol}>
-          {tk.emoji} {tk.symbol}
-        </option>
-      ))}
-    </select>
-  );
+  // Price impact (USD in vs out) and minimum received after slippage.
+  const amountInUsd = quote ? Number(quote.routeSummary.amountInUsd) : 0;
+  const amountOutUsd = quote ? Number(quote.routeSummary.amountOutUsd) : 0;
+  // Gap beyond the known app fee ≈ price impact / low-liquidity slippage.
+  const priceImpactPct =
+    amountInUsd > 0
+      ? Math.max(0, (1 - amountOutUsd / amountInUsd) * 100 - SWAP_FEE_BPS / 100)
+      : 0;
+  const minReceived = amountOutDisplay * (1 - SWAP_SLIPPAGE_BPS / 10000);
+  const highImpact = priceImpactPct >= 5;
 
+  // ---- Render ----
   if (!isConnected) {
     return (
       <div style={{ textAlign: "center", padding: "24px 0" }}>
@@ -386,7 +372,13 @@ export default function SwapBox({ defaultFrom, defaultTo }: Props) {
           onChange={(e) => setAmount(e.target.value)}
           style={{ flex: 1 }}
         />
-        <TokenSelect value={fromToken} onChange={setFromToken} exclude={toToken} />
+        <TokenPicker
+          value={fromToken}
+          onChange={setFromToken}
+          exclude={toToken}
+          disabled={isProcessing}
+          searchPlaceholder={t("Search token", "Token ara")}
+        />
       </div>
 
       {/* Flip */}
@@ -422,7 +414,13 @@ export default function SwapBox({ defaultFrom, defaultTo }: Props) {
           placeholder="0.0"
           style={{ flex: 1 }}
         />
-        <TokenSelect value={toToken} onChange={setToToken} exclude={fromToken} />
+        <TokenPicker
+          value={toToken}
+          onChange={setToToken}
+          exclude={fromToken}
+          disabled={isProcessing}
+          searchPlaceholder={t("Search token", "Token ara")}
+        />
       </div>
 
       {/* Quote details */}
@@ -444,6 +442,17 @@ export default function SwapBox({ defaultFrom, defaultTo }: Props) {
             {t("received", "alınır")}
           </div>
           <div>
+            {t("Min received", "Min. alınacak")}:{" "}
+            {minReceived.toLocaleString("en-US", { maximumFractionDigits: 6 })}{" "}
+            {toToken.symbol}
+          </div>
+          <div>
+            {t("Price impact", "Fiyat etkisi")}:{" "}
+            <span style={{ color: highImpact ? "var(--error)" : "inherit" }}>
+              {priceImpactPct.toFixed(2)}%
+            </span>
+          </div>
+          <div>
             {t("Network fee", "Ağ ücreti")}: ~$
             {Number(quote.routeSummary.gasUsd).toFixed(3)}
           </div>
@@ -451,6 +460,15 @@ export default function SwapBox({ defaultFrom, defaultTo }: Props) {
             {t("App fee", "Uygulama ücreti")}: {SWAP_FEE_BPS / 100}%{" "}
             {t("(goes to you)", "(sana gider)")}
           </div>
+          {highImpact && (
+            <div style={{ color: "var(--error)", marginTop: 4 }}>
+              ⚠️{" "}
+              {t(
+                "High price impact — low liquidity, you may get a poor rate.",
+                "Yüksek fiyat etkisi — düşük likidite, kötü kur alabilirsin.",
+              )}
+            </div>
+          )}
         </div>
       )}
 
