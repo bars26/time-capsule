@@ -10,7 +10,7 @@ import { RootProvider } from "./rootProvider";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import "./globals.css";
 
-const SITE_URL = "https://time-capsule-nu-tan.vercel.app";
+const SITE_URL = "https://timecapsule-base.vercel.app";
 const SITE_NAME = "Time Capsule";
 const SITE_DESC =
   "Geleceğe bir mesaj kilitle. Kendine veya başkasına. Base ağında onchain, şifreli, kalıcı.";

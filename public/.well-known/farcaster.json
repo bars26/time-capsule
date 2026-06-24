@@ -7,11 +7,11 @@
   "miniapp": {
     "version": "1",
     "name": "Time Capsule",
-    "iconUrl": "https://time-capsule-nu-tan.vercel.app/sphere-icon.png",
-    "homeUrl": "https://time-capsule-nu-tan.vercel.app",
-    "imageUrl": "https://time-capsule-nu-tan.vercel.app/sphere-og.png",
+    "iconUrl": "https://timecapsule-base.vercel.app/sphere-icon.png",
+    "homeUrl": "https://timecapsule-base.vercel.app",
+    "imageUrl": "https://timecapsule-base.vercel.app/sphere-og.png",
     "buttonTitle": "Kapsül oluştur",
-    "splashImageUrl": "https://time-capsule-nu-tan.vercel.app/sphere-icon.png",
+    "splashImageUrl": "https://timecapsule-base.vercel.app/sphere-icon.png",
     "splashBackgroundColor": "#000000",
     "description": "Geleceğe bir mesaj kilitle. Onchain, şifreli, kalıcı.",
     "primaryCategory": "social"
@@ -19,11 +19,11 @@
   "frame": {
     "version": "1",
     "name": "Time Capsule",
-    "iconUrl": "https://time-capsule-nu-tan.vercel.app/sphere-icon.png",
-    "homeUrl": "https://time-capsule-nu-tan.vercel.app",
-    "imageUrl": "https://time-capsule-nu-tan.vercel.app/sphere-og.png",
+    "iconUrl": "https://timecapsule-base.vercel.app/sphere-icon.png",
+    "homeUrl": "https://timecapsule-base.vercel.app",
+    "imageUrl": "https://timecapsule-base.vercel.app/sphere-og.png",
     "buttonTitle": "Kapsül oluştur",
-    "splashImageUrl": "https://time-capsule-nu-tan.vercel.app/sphere-icon.png",
+    "splashImageUrl": "https://timecapsule-base.vercel.app/sphere-icon.png",
     "splashBackgroundColor": "#000000"
   }
 }
