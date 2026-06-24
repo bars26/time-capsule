@@ -642,9 +642,20 @@ function Home() {
         )}
       </form>
 
-      <div style={{ marginTop: 32, textAlign: "center" }}>
+      <div
+        style={{
+          marginTop: 32,
+          textAlign: "center",
+          display: "flex",
+          gap: 16,
+          justifyContent: "center",
+        }}
+      >
         <Link href="/capsules" className="muted">
           {t("home.myCapsulesArrow")}
+        </Link>
+        <Link href="/swap" className="muted">
+          {t("home.swapLink")}
         </Link>
       </div>
     </main>
