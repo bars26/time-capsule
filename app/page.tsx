@@ -706,6 +706,9 @@ function Home() {
         <Link href="/swap" className="muted">
           {t("home.swapLink")}
         </Link>
+        <Link href="/gm" className="muted">
+          {t("home.gmLink")}
+        </Link>
       </div>
     </main>
   );
