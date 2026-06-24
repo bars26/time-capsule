@@ -27,6 +27,11 @@ durumunu özetler. Yeni bir oturuma başlarken bunu okutmak yeterli.
    - ETH için approval yok; ERC-20 girişte otomatik approve.
 4. **Gömülü hızlı takas:** kapsül oluşturma ekranında "💱 Low on ETH? Quick swap" kutusu.
 5. **Temiz domain** + kodda SITE_URL ve farcaster.json URL'leri yeni adrese güncellendi.
+6. **Onchain GM/GN (YENİ, CANLI):** günlük selam butonu, streak takibi, 0.00001 ETH fee.
+   - Kontrat (Base): `0x1d7D08a03D4c9C6375ca1363Eba384b14a1Ac88D`
+   - **Owner = deploy eden EOA** `0x4f8...406bf`; biriken fee `withdraw()` ile bu cüzdana çekilir.
+   - Sayfa: `/gm`. Kontrat kaynağı: `contracts/GmGn.sol`, config: `lib/gmgn.ts`.
+   - Builder Code suffix her selama ekleniyor.
 
 ### İlgili dosyalar
 - `lib/swap.ts` — fee config (SWAP_FEE_BPS=30, SWAP_SLIPPAGE_BPS=50, SWAP_FEE_RECIPIENT), token listesi, tipler
@@ -45,8 +50,9 @@ durumunu özetler. Yeni bir oturuma başlarken bunu okutmak yeterli.
    adresle özel token ekleme, USD ile giriş.
 3. **Büyük fikirler (fikir aşamasında):**
    - **x402** premium aksiyon (kullanım başına USDC; örn. "kapsülü erken aç", "özel tema", "AI mesaj").
-   - **GM/GN** günlük onchain buton (her gün tekrar eden işlem + küçük fee).
    - **NFT mint** drop'ları (mint başına fee).
+   - ~~GM/GN günlük onchain buton~~ ✅ YAPILDI (yukarı bak).
+   - Opsiyonel: GM/GN owner'ını smart wallet'a `transferOwnership` ile taşıyıp fee'leri tek cüzdanda toplama.
 4. **Opsiyonel:** her sabah otomatik "dün ne kadar fee kazandım" özeti (scheduled task).
 
 ## Çalıştırma / Deploy
