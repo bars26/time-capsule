@@ -42,10 +42,9 @@ durumunu özetler. Yeni bir oturuma başlarken bunu okutmak yeterli.
 - `app/page.tsx` — kapsül ekranına gömülü SwapBox
 
 ## YAPILACAKLAR / SIRADAKİLER
-1. **Farcaster / Base mini-app imzası** (telefon gerektiriyor):
-   - Yeni domain (`timecapsule-base.vercel.app`) için `public/.well-known/farcaster.json`
-     içindeki `accountAssociation`'ı Farcaster hesabıyla yeniden imzala, üçlüyü yapıştır, push.
-   - Ayrıca **dashboard.base.org** → uygulama → App Information'daki URL'yi yeni domaine güncelle.
+1. ~~Farcaster / Base mini-app imzası~~ ✅ YAPILDI — yeni domain için accountAssociation
+   imzalandı (FID 243127), frame/miniapp birebir aynı yapıldı, manifest tool yeşil.
+   base.dev App Domains'te `timecapsule-base.vercel.app` Primary olarak ekli.
 2. **Swap parlatma (opsiyonel):** dropdown'u yukarı doğru açma seçeneği, daha çok token,
    adresle özel token ekleme, USD ile giriş.
 3. **Büyük fikirler (fikir aşamasında):**
