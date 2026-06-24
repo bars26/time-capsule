@@ -470,7 +470,8 @@ function Home() {
           border: "1px solid var(--border)",
           borderRadius: "var(--radius-sm)",
           marginBottom: 24,
-          overflow: "hidden",
+          // Must stay visible so the token dropdown isn't clipped.
+          overflow: "visible",
         }}
       >
         <button
@@ -484,6 +485,9 @@ function Home() {
             alignItems: "center",
             background: "var(--surface)",
             border: "none",
+            borderRadius: showSwap
+              ? "var(--radius-sm) var(--radius-sm) 0 0"
+              : "var(--radius-sm)",
             padding: "12px 14px",
             cursor: isProcessing ? "not-allowed" : "pointer",
             fontSize: 14,
