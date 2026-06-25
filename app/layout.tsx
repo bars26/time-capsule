@@ -56,7 +56,7 @@ export const metadata: Metadata = {
       version: "next",
       imageUrl: OG_IMAGE_URL,
       button: {
-        title: "Kapsül oluştur",
+        title: "Create a capsule",
         action: {
           type: "launch_miniapp",
           name: SITE_NAME,
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
       version: "next",
       imageUrl: OG_IMAGE_URL,
       button: {
-        title: "Kapsül oluştur",
+        title: "Create a capsule",
         action: {
           type: "launch_frame",
           name: SITE_NAME,
