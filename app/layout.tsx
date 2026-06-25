@@ -4,8 +4,8 @@
 // time and keeps the app working even with restricted/slow network.
 
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { I18nProvider } from "./components/I18nProvider";
 import { RootProvider } from "./rootProvider";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import MiniAppReady from "./components/MiniAppReady";
@@ -94,7 +94,10 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <I18nProvider
+          serverLocale={locale === "en" ? "en" : "tr"}
+          serverMessages={messages}
+        >
           <RootProvider>
             {/* Tells the Farcaster/Base App Mini App host we're ready (dismisses
                 the splash screen). No-op on the regular web. */}
@@ -113,7 +116,7 @@ export default async function RootLayout({
             </div>
             {children}
           </RootProvider>
-        </NextIntlClientProvider>
+        </I18nProvider>
       </body>
     </html>
   );
