@@ -9,16 +9,28 @@
 "use client";
 
 import { useEffect } from "react";
+import { useAccount, useConnect } from "wagmi";
 
 export default function MiniAppReady() {
+  const { isConnected } = useAccount();
+  const { connect, connectors } = useConnect();
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const { sdk } = await import("@farcaster/miniapp-sdk");
         const inMiniApp = await sdk.isInMiniApp().catch(() => false);
-        if (!cancelled && inMiniApp) {
-          await sdk.actions.ready();
+        if (cancelled || !inMiniApp) return;
+
+        // Dismiss the splash screen.
+        await sdk.actions.ready();
+
+        // Auto-connect to the in-app (Farcaster/Base App) wallet so the user
+        // doesn't have to pick an external wallet inside the Mini App.
+        if (!isConnected) {
+          const fc = connectors.find((c) => c.id === "farcaster");
+          if (fc) connect({ connector: fc });
         }
       } catch {
         // Not in a Mini App host (or SDK unavailable) — no-op on the web.
@@ -27,7 +39,7 @@ export default function MiniAppReady() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isConnected, connect, connectors]);
 
   return null;
 }

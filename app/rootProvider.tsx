@@ -20,6 +20,9 @@ import {
   phantomWallet,
 } from "@rainbow-me/rainbowkit/wallets";
 import "@rainbow-me/rainbowkit/styles.css";
+// Farcaster / Base App Mini App embedded-wallet connector. Available inside a
+// Mini App host so users connect their in-app wallet (no external wallet).
+import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 
 // Explicit wallet list. Base ecosystem prioritizes Coinbase Wallet (includes
 // Base Smart Wallet flow). MetaMask kept for compatibility but its mobile app
@@ -45,7 +48,9 @@ const connectors = connectorsForWallets(
 );
 
 const config = createConfig({
-  connectors,
+  // Mini App connector first so it's available inside Base App / Farcaster;
+  // RainbowKit's external wallets follow for the regular web.
+  connectors: [farcasterMiniApp(), ...connectors],
   chains: [base],
   transports: {
     [base.id]: http(),
