@@ -8,6 +8,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { RootProvider } from "./rootProvider";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
+import MiniAppReady from "./components/MiniAppReady";
 import "./globals.css";
 
 const SITE_URL = "https://timecapsule-base.vercel.app";
@@ -95,6 +96,9 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <RootProvider>
+            {/* Tells the Farcaster/Base App Mini App host we're ready (dismisses
+                the splash screen). No-op on the regular web. */}
+            <MiniAppReady />
             {/* Floating language switcher — visible on every page, fixed
                 top-right so it doesn't fight with each page's own header. */}
             <div
