@@ -37,6 +37,11 @@ durumunu özetler. Yeni bir oturuma başlarken bunu okutmak yeterli.
      Web'de RainbowKit aynen çalışıyor; Mini App'te gömülü cüzdan.
    - Swap onayı artık **sınırsız değil, sadece swap edilen miktar kadar** (SwapBox.tsx exact approval).
    - Mini App'te açılış + otomatik bağlanma + iki yönlü swap test edildi, çalışıyor.
+   - **Dil değiştirme istemci tarafına taşındı** (`app/components/I18nProvider.tsx`): localStorage +
+     anlık mesaj değişimi, çereze/yenilemeye bağlı değil. Mini App webview'inde EN/TR artık kalıcı.
+     (LanguageSwitcher artık `useLocaleSwitch()` kullanıyor; layout `I18nProvider` ile sarılı.)
+9. **Tanıtım başladı:** yeni embed kapağı (`public/sphere-og.png`, kapsül temalı), launch cast'leri
+   (`LAUNCH_CASTS.md`, EN+TR). İlk cast yayında, embed yeni kapakla render oluyor.
 6. **Onchain GM/GN (YENİ, CANLI):** günlük selam butonu, streak takibi, 0.00001 ETH fee.
    - Kontrat (Base): `0x1d7D08a03D4c9C6375ca1363Eba384b14a1Ac88D`
    - **Owner = deploy eden EOA** `0x4f8...406bf`; biriken fee `withdraw()` ile bu cüzdana çekilir.
