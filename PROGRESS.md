@@ -30,6 +30,13 @@ durumunu özetler. Yeni bir oturuma başlarken bunu okutmak yeterli.
 7. **Swap'lara Builder Code (✅ CANLI):** swap + approve işlemlerinin calldata'sına
    `BUILDER_CODE_SUFFIX` ekleniyor (SwapBox.tsx), böylece swap'lar da base.dev'e atfediliyor.
    Zincirde doğrulandı (tx 0xa62c…1235 calldata sonunda suffix var). ERC-8021 mantığı, router revert etmiyor.
+8. **Base App / Farcaster Mini App (✅ CANLI):**
+   - `app/components/MiniAppReady.tsx`: `@farcaster/miniapp-sdk` ile `ready()` → splash (mavi ikon) kalkıyor.
+   - Aynı bileşen Mini App içinde **otomatik bağlanma** yapıyor (connector id `'farcaster'`).
+   - `app/rootProvider.tsx`: wagmi config'e `farcasterMiniApp()` connector'ı eklendi (`@farcaster/miniapp-wagmi-connector`).
+     Web'de RainbowKit aynen çalışıyor; Mini App'te gömülü cüzdan.
+   - Swap onayı artık **sınırsız değil, sadece swap edilen miktar kadar** (SwapBox.tsx exact approval).
+   - Mini App'te açılış + otomatik bağlanma + iki yönlü swap test edildi, çalışıyor.
 6. **Onchain GM/GN (YENİ, CANLI):** günlük selam butonu, streak takibi, 0.00001 ETH fee.
    - Kontrat (Base): `0x1d7D08a03D4c9C6375ca1363Eba384b14a1Ac88D`
    - **Owner = deploy eden EOA** `0x4f8...406bf`; biriken fee `withdraw()` ile bu cüzdana çekilir.
