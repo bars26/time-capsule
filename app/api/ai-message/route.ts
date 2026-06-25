@@ -1,23 +1,49 @@
 // app/api/ai-message/route.ts
-// Generates a short, personal time-capsule letter. This route is gated by the
-// x402 payment middleware (see middleware.ts) — it only runs after the buyer's
-// USDC payment is verified, so each successful call is a paid request.
+// AI-written time-capsule letter, gated by x402 payment via `withX402`.
 //
-// Provider-agnostic: calls any OpenAI-compatible Chat Completions endpoint.
-// Requires env: AI_API_KEY (and optionally AI_BASE_URL, AI_MODEL).
+// Why withX402 (route wrapper) instead of middleware:
+//  - Next.js middleware runs on the Edge runtime, which can't load the x402
+//    server packages (Node-only modules like @x402/extensions/bazaar). The
+//    route handler runs on the Node runtime, so it works on Vercel.
+//  - withX402 only SETTLES the USDC payment if the handler returns success
+//    (status < 400). If the AI call fails, the user is NOT charged.
+//
+// Requires env: CDP_API_KEY_ID, CDP_API_KEY_SECRET (facilitator auth),
+// X402_PAY_TO (USDC receiver), AI_API_KEY (and optional AI_BASE_URL, AI_MODEL).
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { withX402, x402ResourceServer } from "@x402/next";
+import { ExactEvmScheme } from "@x402/evm/exact/server";
+import { HTTPFacilitatorClient } from "@x402/core/server";
+import { facilitator } from "@coinbase/x402";
+import {
+  BUILDER_CODE,
+  declareBuilderCodeExtension,
+} from "@x402/extensions/builder-code";
 
 export const runtime = "nodejs";
 
+const payTo = (process.env.X402_PAY_TO ||
+  "0x9f417535486848942add6CF58Ac7E841976bfD3B") as `0x${string}`;
+const BUILDER_CODE_ID = "bc_sfeb71ad";
+
 const AI_BASE_URL = process.env.AI_BASE_URL || "https://api.openai.com/v1";
 const AI_MODEL = process.env.AI_MODEL || "gpt-4o-mini";
+
+// CDP facilitator (Base mainnet). Reads CDP_API_KEY_ID / CDP_API_KEY_SECRET.
+const facilitatorClient = new HTTPFacilitatorClient(facilitator);
+const server = new x402ResourceServer(facilitatorClient).register(
+  "eip155:8453",
+  new ExactEvmScheme(),
+);
 
 function clamp(v: unknown, max: number): string {
   return String(v ?? "").slice(0, max);
 }
 
-export async function POST(req: Request) {
+// The actual work. Runs only after payment authorization is verified;
+// payment is settled by withX402 only if this returns status < 400.
+async function handler(req: NextRequest): Promise<NextResponse> {
   const key = process.env.AI_API_KEY;
   if (!key) {
     return NextResponse.json(
@@ -80,10 +106,7 @@ export async function POST(req: Request) {
     const message: string =
       data?.choices?.[0]?.message?.content?.trim?.() ?? "";
     if (!message) {
-      return NextResponse.json(
-        { error: "Empty AI response" },
-        { status: 502 },
-      );
+      return NextResponse.json({ error: "Empty AI response" }, { status: 502 });
     }
     return NextResponse.json({ message });
   } catch (e) {
@@ -93,3 +116,21 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export const POST = withX402(
+  handler,
+  {
+    accepts: {
+      scheme: "exact",
+      price: "$0.05",
+      network: "eip155:8453",
+      payTo,
+    },
+    description: "AI-written time capsule letter",
+    mimeType: "application/json",
+    extensions: {
+      [BUILDER_CODE]: declareBuilderCodeExtension(BUILDER_CODE_ID),
+    },
+  },
+  server,
+);
