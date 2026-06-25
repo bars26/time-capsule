@@ -27,6 +27,9 @@ durumunu özetler. Yeni bir oturuma başlarken bunu okutmak yeterli.
    - ETH için approval yok; ERC-20 girişte otomatik approve.
 4. **Gömülü hızlı takas:** kapsül oluşturma ekranında "💱 Low on ETH? Quick swap" kutusu.
 5. **Temiz domain** + kodda SITE_URL ve farcaster.json URL'leri yeni adrese güncellendi.
+7. **Swap'lara Builder Code (✅ CANLI):** swap + approve işlemlerinin calldata'sına
+   `BUILDER_CODE_SUFFIX` ekleniyor (SwapBox.tsx), böylece swap'lar da base.dev'e atfediliyor.
+   Zincirde doğrulandı (tx 0xa62c…1235 calldata sonunda suffix var). ERC-8021 mantığı, router revert etmiyor.
 6. **Onchain GM/GN (YENİ, CANLI):** günlük selam butonu, streak takibi, 0.00001 ETH fee.
    - Kontrat (Base): `0x1d7D08a03D4c9C6375ca1363Eba384b14a1Ac88D`
    - **Owner = deploy eden EOA** `0x4f8...406bf`; biriken fee `withdraw()` ile bu cüzdana çekilir.
