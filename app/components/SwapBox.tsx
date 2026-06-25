@@ -20,13 +20,7 @@ import {
 } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { base } from "wagmi/chains";
-import {
-  parseUnits,
-  formatUnits,
-  erc20Abi,
-  maxUint256,
-  type Address,
-} from "viem";
+import { parseUnits, formatUnits, erc20Abi, type Address } from "viem";
 import { useLocale } from "next-intl";
 
 import {
@@ -205,7 +199,9 @@ export default function SwapBox({ defaultFrom, defaultTo }: Props) {
             address: fromToken.address as Address,
             abi: erc20Abi,
             functionName: "approve",
-            args: [router, maxUint256],
+            // Approve only the exact amount being swapped (safer / less scary
+            // than an unlimited approval).
+            args: [router, wei],
             chainId: base.id,
             dataSuffix: BUILDER_CODE_SUFFIX,
           });
