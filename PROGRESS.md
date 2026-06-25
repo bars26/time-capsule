@@ -47,9 +47,25 @@ durumunu özetler. Yeni bir oturuma başlarken bunu okutmak yeterli.
    base.dev App Domains'te `timecapsule-base.vercel.app` Primary olarak ekli.
 2. **Swap parlatma (opsiyonel):** dropdown'u yukarı doğru açma seçeneği, daha çok token,
    adresle özel token ekleme, USD ile giriş.
-3. **Büyük fikirler (fikir aşamasında):**
-   - **x402** premium aksiyon (kullanım başına USDC; örn. "kapsülü erken aç", "özel tema", "AI mesaj").
-   - **NFT mint** drop'ları (mint başına fee).
+3. **x402 — AI mesaj yazma (DEVAM EDİYOR):**
+   - ✅ Sunucu tarafı CANLI ve doğrulandı: `middleware.ts` (paymentProxy, Base mainnet
+     CDP facilitator, Builder Code bc_sfeb71ad) + `app/api/ai-message/route.ts` (OpenAI-uyumlu LLM).
+     `/api/ai-message` artık "Payment Required" (402) dönüyor.
+   - Paketler: `@x402/next @x402/evm @x402/core @x402/extensions @coinbase/x402 @x402/fetch`
+     `--legacy-peer-deps` ile kuruldu (Next 15, @x402/next next>=16 istiyor — peer uyarısı atlandı).
+   - .env.local: CDP_API_KEY_ID/SECRET (Ed25519), X402_PAY_TO, AI_API_KEY, AI_MODEL=gpt-4o-mini.
+   - ✅ İstemci tarafı CANLI (lokalde test edildi, çalışıyor): `app/components/AiMessageButton.tsx`
+     — kapsül ekranında "✨ AI ile yaz · $0.05" butonu; bağlı cüzdan gassız EIP-3009 imzasıyla
+     $0.05 USDC öder, dönen mektup mesaj alanına yazılır. OpenAI billing yüklendi (gpt-4o-mini,
+     istek başına ~$0.0002 → bol marj).
+   - ⏳ CANLIYA ÇIKIŞ İÇİN KALAN:
+       1. `.npmrc` ekle: `legacy-peer-deps=true` (Vercel build'i peer çakışmasında patlamasın).
+       2. Vercel → Settings → Environment Variables: CDP_API_KEY_ID, CDP_API_KEY_SECRET,
+          X402_PAY_TO, AI_API_KEY, AI_MODEL (Production).
+       3. Commit + push (middleware.ts, app/api/ai-message, AiMessageButton.tsx, page.tsx,
+          package.json, package-lock.json, .npmrc).
+   - İyileştirme (opsiyonel): AI başarısızsa $0 tahsil et (x402 `upto` şeması).
+   - **NFT mint** drop'ları (mint başına fee) — sırada.
    - ~~GM/GN günlük onchain buton~~ ✅ YAPILDI (yukarı bak).
    - Opsiyonel: GM/GN owner'ını smart wallet'a `transferOwnership` ile taşıyıp fee'leri tek cüzdanda toplama.
 4. **Opsiyonel:** her sabah otomatik "dün ne kadar fee kazandım" özeti (scheduled task).

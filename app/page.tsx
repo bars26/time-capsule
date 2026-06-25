@@ -38,6 +38,7 @@ import {
 import { encryptMessage } from "../lib/encryption";
 import { uploadToIPFS } from "../lib/ipfs";
 import SwapBox from "./components/SwapBox";
+import AiMessageButton from "./components/AiMessageButton";
 
 const COVER_EMOJIS = ["💌", "📜", "🎁", "🎂", "🌹", "🎓", "⏳", "🌙", "✨", "🎉"];
 const FEE_ETH = "0.0001";
@@ -603,6 +604,17 @@ function Home() {
           rows={5}
           style={{ marginBottom: 16 }}
           required
+        />
+
+        <AiMessageButton
+          disabled={isProcessing}
+          getContext={() => ({
+            tone: "heartfelt",
+            recipient: recipientMode === "other" ? recipientInput : "",
+            occasion: title,
+            notes: message,
+          })}
+          onResult={(text) => setMessage(text.slice(0, MAX_MESSAGE))}
         />
 
         <label className="label">{t("home.unlockDateLabel")}</label>
