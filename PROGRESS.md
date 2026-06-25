@@ -47,10 +47,15 @@ durumunu özetler. Yeni bir oturuma başlarken bunu okutmak yeterli.
    base.dev App Domains'te `timecapsule-base.vercel.app` Primary olarak ekli.
 2. **Swap parlatma (opsiyonel):** dropdown'u yukarı doğru açma seçeneği, daha çok token,
    adresle özel token ekleme, USD ile giriş.
-3. **x402 — AI mesaj yazma (DEVAM EDİYOR):**
-   - ✅ Sunucu tarafı CANLI ve doğrulandı: `middleware.ts` (paymentProxy, Base mainnet
-     CDP facilitator, Builder Code bc_sfeb71ad) + `app/api/ai-message/route.ts` (OpenAI-uyumlu LLM).
-     `/api/ai-message` artık "Payment Required" (402) dönüyor.
+3. **x402 — AI mesaj yazma (✅ CANLIDA, BİTTİ):**
+   - Kapsül ekranında "✨ AI ile yaz · $0.05" → cüzdan gassız EIP-3009 imzasıyla $0.05 USDC öder,
+     OpenAI (gpt-4o-mini) mektubu üretir, mesaj alanına yazılır. Builder Code (bc_sfeb71ad) ekli.
+   - ⚠️ Mimari notu: middleware (Edge) KULLANILMIYOR. Next.js middleware Edge'de çalışıyor ve
+     x402 paketleri (bazaar vb. Node modülleri) Edge'de yüklenemiyor → Vercel build patlıyordu.
+     Çözüm: `app/api/ai-message/route.ts` içinde `withX402` (route handler sarmalayıcı, `runtime="nodejs"`).
+     Bonus: `withX402` ödemeyi yalnızca handler başarılı (status<400) dönerse tahsil ediyor —
+     AI hata verirse kullanıcıdan para alınmıyor. (middleware.ts silindi.)
+   - Sunucu CANLI ve doğrulandı, endpoint 402 dönüyor; uçtan uca lokalde+canlıda test edildi.
    - Paketler: `@x402/next @x402/evm @x402/core @x402/extensions @coinbase/x402 @x402/fetch`
      `--legacy-peer-deps` ile kuruldu (Next 15, @x402/next next>=16 istiyor — peer uyarısı atlandı).
    - .env.local: CDP_API_KEY_ID/SECRET (Ed25519), X402_PAY_TO, AI_API_KEY, AI_MODEL=gpt-4o-mini.
