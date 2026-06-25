@@ -39,6 +39,7 @@ import {
   type BuildResponse,
 } from "../../lib/swap";
 import TokenPicker from "./TokenPicker";
+import { BUILDER_CODE_SUFFIX } from "../../lib/contract";
 
 type Step =
   | "idle"
@@ -206,6 +207,7 @@ export default function SwapBox({ defaultFrom, defaultTo }: Props) {
             functionName: "approve",
             args: [router, maxUint256],
             chainId: base.id,
+            dataSuffix: BUILDER_CODE_SUFFIX,
           });
           await publicClient.waitForTransactionReceipt({ hash: approveHash });
         }
@@ -228,10 +230,15 @@ export default function SwapBox({ defaultFrom, defaultTo }: Props) {
         );
       }
 
+      // Append the Builder Code suffix to the swap calldata so base.dev
+      // attributes the swap to this app. The router ignores the trailing bytes
+      // (ERC-8021 / Base tagging spec); offchain indexers read the attribution.
       setStep("signing");
+      const taggedData = (buildJson.data.data +
+        BUILDER_CODE_SUFFIX.slice(2)) as `0x${string}`;
       const hash = await sendTransactionAsync({
         to: buildJson.data.routerAddress,
-        data: buildJson.data.data,
+        data: taggedData,
         value: BigInt(buildJson.data.transactionValue || "0"),
         chainId: base.id,
       });
