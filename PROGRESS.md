@@ -90,6 +90,17 @@ durumunu özetler. Yeni bir oturuma başlarken bunu okutmak yeterli.
    - Opsiyonel: GM/GN owner'ını smart wallet'a `transferOwnership` ile taşıyıp fee'leri tek cüzdanda toplama.
 4. **Opsiyonel:** her sabah otomatik "dün ne kadar fee kazandım" özeti (scheduled task).
 
+## YARIN / SIRADAKİLER (dağıtım & büyüme)
+- ~~**Talent Protocol** (talent.app)~~ ✅ YAPILDI: "Time Capsule" projesi oluşturuldu (Consumer Apps),
+  website doğrulandı (layout.tsx'e `talentapp:project_verification` meta'sı eklendi), açıklama eklendi,
+  data sources: GitHub `bars26/time-capsule` + kontratlar (TimeCapsule 0x1F84…, GmGn 0x1d7D…) Base'de.
+  GitHub zaten bağlıydı, $92 Talent Rewards mevcut. Veriler birkaç günde indekslenir.
+- Tanıtımı sürdür: X gönderisi (@base etiketli) + takip cast'leri (LAUNCH_CASTS.md).
+- Embed butonu "Create a capsule" — Manifest Tool → Refresh ile tazele.
+- Opsiyonel özellikler: NFT mint drop, x402 `upto` (AI başarısızsa $0), GM/GN owner → smart wallet,
+  her sabah gelir özeti (scheduled task), swap dropdown yukarı açılma.
+- "Her yere koşturalım": base.dev kataloğu, Talent, Farcaster, X — uygulamayı listelenen her yere ekle.
+
 ## Çalıştırma / Deploy
 - Lokal: `cd ~/base/time-capsule && npm run dev` → http://localhost:3000
 - Deploy: değişiklikleri `git add … && git commit … && git push` → Vercel otomatik yayınlar.
