@@ -52,6 +52,9 @@ export const metadata: Metadata = {
   // imageUrl uses the 3:2 OG preview; splashImageUrl uses the square icon.
   other: {
     "base:app_id": "69eb7d2ae67b282fc52d2a58",
+    // Talent Protocol project ownership verification.
+    "talentapp:project_verification":
+      "b43e56700b45185e73fceac0b1f2f01e2947f03c038957a83273f25dcfc27a98e305d4d31c70e7534aed3a96e835778d1c05934cfc606dec6c278e077835264f",
     "fc:miniapp": JSON.stringify({
       version: "next",
       imageUrl: OG_IMAGE_URL,
